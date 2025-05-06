@@ -11,18 +11,15 @@ import {
 } from "react-native";
 import { moderateScale, scale, verticalScale } from "react-native-size-matters";
 import React, { useState, useRef, useEffect } from "react";
-import { AntDesign, Entypo} from "@expo/vector-icons";
+import { AntDesign, Entypo } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Chats from "../components/molecules/Chats";
 import Calls from "../components/molecules/Calls";
 import Status from "../components/molecules/Status";
 
-
 const Index = () => {
   const [currentPage, setCurrentPage] = useState("Chats");
   const [menuVisible, setMenuVisible] = useState(false);
-
-  
 
   const ActivePage = () => {
     switch (currentPage) {
@@ -69,9 +66,6 @@ const Index = () => {
       </View>
 
       {ActivePage()}
-
-
-      
     </SafeAreaView>
   );
 };
@@ -80,51 +74,48 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   topBarConatiner: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     paddingHorizontal: scale(12),
-    backgroundColor: '#3498db',
+    backgroundColor: "#3498db",
     gap: scale(10),
   },
   topBarButton: {
     flex: 1,
-    alignItems: 'center',
+    alignItems: "center",
     borderBottomWidth: 3,
     paddingBottom: verticalScale(10),
-    borderColor: '#3498db',
+    borderColor: "#3498db",
   },
   topBarText: {
     fontSize: moderateScale(14), // reduced from 16
-    fontWeight: 'bold',
-    color: 'white',
-    textTransform: 'uppercase',
+    fontWeight: "bold",
+    color: "white",
+    textTransform: "uppercase",
   },
   HeaderIcon: {
     fontSize: moderateScale(18), // reduced from 24
-    color: 'white',
+    color: "white",
   },
   chatsphereHeaderStyle: {
-    backgroundColor: '#3498db',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    backgroundColor: "#3498db",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingHorizontal: scale(15),
     paddingBottom: verticalScale(17),
     paddingTop: verticalScale(10),
   },
   iconContainer: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: scale(10),
   },
   chatsphereText: {
-    fontSize: moderateScale(20), 
-    fontWeight: 'bold',
-    color: 'white',
+    fontSize: moderateScale(20),
+    fontWeight: "bold",
+    color: "white",
   },
   // Sidebar styles
-  
-  
 });
-
 
 export default Index;
