@@ -13,6 +13,7 @@ import MessageCard from "./MessageCard"; // Adjust the path
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { scale, verticalScale, moderateScale } from "react-native-size-matters";
 import { Feather, FontAwesome, MaterialIcons } from "@expo/vector-icons";
+import { router } from "expo-router";
 
 const Chats = () => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -40,6 +41,7 @@ const Chats = () => {
       rightIcon: <FontAwesome name="video-camera" style={styles.callIcon} />,
       messageLeftIcon: <Feather name="arrow-down-left" style={[styles.messageRigtIcon, {color:"red"}]} />
     },
+    
   ];
 
   const handleImagePress = (image: any) => {
@@ -89,7 +91,7 @@ const Chats = () => {
               </View>
 
               <View style={styles.iconButtonWrapper}>
-                <TouchableOpacity style={styles.iconButton}>
+                <TouchableOpacity style={styles.iconButton} onPress={() => router.push("./main/ChatScreen")}>
                   <MaterialIcons name="message" size={28} color="white" />
                 </TouchableOpacity>
                 <Text style={styles.iconText}>Message</Text>

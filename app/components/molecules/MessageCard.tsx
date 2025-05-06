@@ -8,6 +8,7 @@ import {
 } from "react-native";
 import React, { useState } from "react";
 import { moderateScale, scale, verticalScale } from "react-native-size-matters";
+import { router } from "expo-router";
 
 const MessageCard = ({
   image,
@@ -22,7 +23,13 @@ const MessageCard = ({
 }: any) => {
   return (
     <>
-      <TouchableOpacity style={styles.button}>
+      <TouchableOpacity style={styles.button} onPress={() =>
+  router.push({
+    pathname: "./main/ChatScreen",
+    params: { name, message },
+  })
+}
+>
         <View style={styles.LeftContainer}>
           <View>
             <TouchableOpacity onPress={onImagePress}>

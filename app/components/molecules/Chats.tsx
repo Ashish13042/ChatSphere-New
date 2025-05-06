@@ -1,10 +1,24 @@
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, Modal, Image, Pressable } from "react-native";
+import {
+  View,
+  Text,
+  FlatList,
+  TouchableOpacity,
+  StyleSheet,
+  Modal,
+  Image,
+  Pressable,
+} from "react-native";
 import React, { useState } from "react";
-import MessageCard from "./MessageCard"; // Adjust the path
+import MessageCard from "./MessageCard";
 import Ionicons from "react-native-vector-icons/Ionicons";
-import { scale, verticalScale, moderateScale } from "react-native-size-matters";
+import {
+  scale,
+  verticalScale,
+  moderateScale,
+} from "react-native-size-matters";
+import { router } from "expo-router";
 
-const Chats = () => {
+const Chats = ({ searchQuery = "" }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedImage, setSelectedImage] = useState<any>(null);
 
@@ -30,7 +44,19 @@ const Chats = () => {
       time: "5.47 pm",
       messageCount: 0,
     },
+    {
+      image: require("../../../assets/images/Sahilimage.png"),
+      name: "Anil Kapoor",
+      message: "Hello Bro",
+      time: "5.47 pm",
+      messageCount: 0,
+    },
+    
   ];
+
+  const filteredData = data.filter((item) =>
+    item.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const handleImagePress = (image: any) => {
     setSelectedImage(image);
@@ -40,7 +66,7 @@ const Chats = () => {
   return (
     <View style={{ flex: 1 }}>
       <FlatList
-        data={data}
+        data={filteredData}
         keyExtractor={(item, index) => index.toString()}
         renderItem={({ item }) => (
           <MessageCard
@@ -52,6 +78,11 @@ const Chats = () => {
             onImagePress={() => handleImagePress(item?.image)}
           />
         )}
+        ListEmptyComponent={
+          <View style={{ alignItems: "center", marginTop: 20 }}>
+            <Text style={{ fontSize: 16, color: "#999" }}>No chats found</Text>
+          </View>
+        }
       />
 
       {/* Modal for enlarged profile image */}
@@ -61,7 +92,10 @@ const Chats = () => {
         animationType="fade"
         onRequestClose={() => setModalVisible(false)}
       >
-        <Pressable style={styles.modalBackground} onPress={() => setModalVisible(false)}>
+        <Pressable
+          style={styles.modalBackground}
+          onPress={() => setModalVisible(false)}
+        >
           <View style={styles.modalContent}>
             <View style={styles.roundWrapper}>
               <Image source={selectedImage} style={styles.fullImage} />
@@ -78,16 +112,9 @@ const Chats = () => {
   );
 };
 
+export default Chats;
+
 const styles = StyleSheet.create({
-  newChatButton: {
-    position: "absolute",
-    bottom: verticalScale(20),
-    right: scale(20),
-    backgroundColor: "#3498db",
-    padding: moderateScale(15),
-    borderRadius: 25,
-    elevation: 5,
-  },
   modalBackground: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.7)",
@@ -96,7 +123,7 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     padding: moderateScale(10),
-    borderRadius: 50,
+    borderRadius: 20,
   },
   roundWrapper: {
     width: 250,
@@ -109,6 +136,13 @@ const styles = StyleSheet.create({
     height: "100%",
     resizeMode: "cover",
   },
+  newChatButton: {
+    position: "absolute",
+    bottom: verticalScale(20),
+    right: scale(20),
+    backgroundColor: "#3498db",
+    padding: scale(15),
+    borderRadius: 50,
+    elevation: 5,
+  },
 });
-
-export default Chats;
