@@ -10,8 +10,11 @@ import {
 } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import * as ImagePicker from "expo-image-picker";
-import { Audio } from "expo-audio";
+import { Audio } from "expo-av";
 import { useLocalSearchParams } from "expo-router";
+import socket from "@/services/socket";
+import { useEffect } from "react";
+
 
 const ChatScreen = () => {
   interface Message {
@@ -21,6 +24,7 @@ const ChatScreen = () => {
     uri?: string;
     sender: string;
   }
+  
   const { name, image } = useLocalSearchParams();
   const [messages, setMessages] = useState<Message[]>([
     { id: "1", text: "Hey!", type: "text", sender: "other" },
@@ -34,13 +38,32 @@ const ChatScreen = () => {
 
   const handleSend = () => {
     if (input.trim()) {
+      const messageData = {
+        roomId: "demoID",
+        text: input,
+        type: "text",
+        sender: "me",
+      };
+  
+      // Show locally
       setMessages((prev) => [
         ...prev,
-        { id: Date.now().toString(), text: input, type: "text", sender: "me" },
+        {
+          id: Date.now().toString(),
+          text: input,
+          type: "text",
+          sender: "me",
+        },
       ]);
+  
+      // Emit via socket
+      socket.emit("send-message", messageData);
       setInput("");
     }
   };
+  
+
+
 
   const handlePickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -48,16 +71,26 @@ const ChatScreen = () => {
       quality: 1,
     });
     if (!result.canceled) {
+      const uri = result.assets[0].uri;
+    
       setMessages((prev) => [
         ...prev,
         {
           id: Date.now().toString(),
           type: "image",
-          uri: result.assets[0].uri,
+          uri,
           sender: "me",
         },
       ]);
+    
+      socket.emit("send-message", {
+        roomId: name?.toString(),
+        type: "image",
+        uri,
+        sender: "me",
+      });
     }
+    
   };
 
   const handleRecordAudio = async () => {
@@ -72,6 +105,14 @@ const ChatScreen = () => {
             ...prev,
             { id: Date.now().toString(), type: "audio", uri, sender: "me" },
           ]);
+          
+          socket.emit("send-message", {
+            roomId: name?.toString(),
+            type: "audio",
+            uri,
+            sender: "me",
+          });
+          
         }
       } else {
         const permission = await Audio.requestPermissionsAsync();
@@ -87,6 +128,30 @@ const ChatScreen = () => {
     }
   };
 
+  useEffect(() => {
+    const roomId = name?.toString(); // use `name` as roomId or customize
+  
+    socket.emit("join-room", roomId);
+  
+    socket.on("receive-message", (data) => {
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: Date.now().toString(),
+          type: data.type,
+          text: data.text,
+          uri: data.uri,
+          sender: "other",
+        },
+      ]);
+    });
+  
+    return () => {
+      socket.off("receive-message");
+    };
+  }, []);
+  
+
   const renderMessage = ({ item }: { item: Message }) => {
     if (item.type === "image") {
       return <Image source={{ uri: item.uri }} style={styles.imageMessage} />;
@@ -95,8 +160,12 @@ const ChatScreen = () => {
       return (
         <TouchableOpacity
           onPress={async () => {
-            const { sound } = await Audio.Sound.createAsync({ uri: item.uri });
-            await sound.playAsync();
+            if (item.uri) {
+              const { sound } = await Audio.Sound.createAsync({ uri: item.uri });
+              await sound.playAsync();
+            } else {
+              console.error("Audio URI is undefined");
+            }
           }}
           style={styles.audioBubble}
         >

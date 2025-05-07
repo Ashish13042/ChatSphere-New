@@ -207,13 +207,13 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
   fontSize: moderateScale(14),
-  color: "#000",
+  color: "#3498db",
   paddingVertical: 0,
   },
   searchContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#e6e6e6",
+    backgroundColor: "#3498db",
     marginHorizontal: scale(15),
    
     borderRadius: scale(20),

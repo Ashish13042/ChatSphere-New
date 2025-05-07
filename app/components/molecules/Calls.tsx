@@ -91,7 +91,7 @@ const Chats = () => {
               </View>
 
               <View style={styles.iconButtonWrapper}>
-                <TouchableOpacity style={styles.iconButton} onPress={() => router.push("./main/ChatScreen")}>
+                <TouchableOpacity style={styles.iconButton} onPress={() => router.push({ pathname: "./main/ChatScreen", params: { name: "Sahil Sharma", message: "Hello Bro" } })}>
                   <MaterialIcons name="message" size={28} color="white" />
                 </TouchableOpacity>
                 <Text style={styles.iconText}>Message</Text>
