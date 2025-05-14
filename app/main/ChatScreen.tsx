@@ -15,7 +15,6 @@ import { useLocalSearchParams } from "expo-router";
 import socket from "@/services/socket";
 import { useEffect } from "react";
 
-
 const ChatScreen = () => {
   interface Message {
     id: string;
@@ -24,7 +23,7 @@ const ChatScreen = () => {
     uri?: string;
     sender: string;
   }
-  
+
   const { name, image } = useLocalSearchParams();
   const [messages, setMessages] = useState<Message[]>([
     { id: "1", text: "Hey!", type: "text", sender: "other" },
@@ -36,15 +35,40 @@ const ChatScreen = () => {
   const [input, setInput] = useState("");
   const [recording, setRecording] = useState<Audio.Recording | null>(null);
 
+  useEffect(() => {
+    const roomId = name?.toString(); // Use the chat name as the room ID
+    console.log("Joining room:", roomId);
+    socket.emit("join-room", roomId);
+    console.log("Socket connected:", socket.connected);
+
+    // Listen for incoming messages
+    socket.on("receive-message", (data) => {
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: Date.now().toString(),
+          type: data.type,
+          text: data.text,
+          uri: data.uri,
+          sender: "other",
+        },
+      ]);
+    });
+
+    return () => {
+      socket.off("receive-message");
+    };
+  }, []);
+
   const handleSend = () => {
     if (input.trim()) {
       const messageData = {
         roomId: "demoID",
-        text: input,
+        message: input,
         type: "text",
         sender: "me",
       };
-  
+
       // Show locally
       setMessages((prev) => [
         ...prev,
@@ -55,15 +79,12 @@ const ChatScreen = () => {
           sender: "me",
         },
       ]);
-  
+
       // Emit via socket
       socket.emit("send-message", messageData);
       setInput("");
     }
   };
-  
-
-
 
   const handlePickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -72,7 +93,7 @@ const ChatScreen = () => {
     });
     if (!result.canceled) {
       const uri = result.assets[0].uri;
-    
+
       setMessages((prev) => [
         ...prev,
         {
@@ -82,7 +103,7 @@ const ChatScreen = () => {
           sender: "me",
         },
       ]);
-    
+
       socket.emit("send-message", {
         roomId: name?.toString(),
         type: "image",
@@ -90,7 +111,6 @@ const ChatScreen = () => {
         sender: "me",
       });
     }
-    
   };
 
   const handleRecordAudio = async () => {
@@ -105,14 +125,13 @@ const ChatScreen = () => {
             ...prev,
             { id: Date.now().toString(), type: "audio", uri, sender: "me" },
           ]);
-          
+
           socket.emit("send-message", {
             roomId: name?.toString(),
             type: "audio",
             uri,
             sender: "me",
           });
-          
         }
       } else {
         const permission = await Audio.requestPermissionsAsync();
@@ -128,30 +147,6 @@ const ChatScreen = () => {
     }
   };
 
-  useEffect(() => {
-    const roomId = name?.toString(); // use `name` as roomId or customize
-  
-    socket.emit("join-room", roomId);
-  
-    socket.on("receive-message", (data) => {
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: Date.now().toString(),
-          type: data.type,
-          text: data.text,
-          uri: data.uri,
-          sender: "other",
-        },
-      ]);
-    });
-  
-    return () => {
-      socket.off("receive-message");
-    };
-  }, []);
-  
-
   const renderMessage = ({ item }: { item: Message }) => {
     if (item.type === "image") {
       return <Image source={{ uri: item.uri }} style={styles.imageMessage} />;
@@ -161,7 +156,9 @@ const ChatScreen = () => {
         <TouchableOpacity
           onPress={async () => {
             if (item.uri) {
-              const { sound } = await Audio.Sound.createAsync({ uri: item.uri });
+              const { sound } = await Audio.Sound.createAsync({
+                uri: item.uri,
+              });
               await sound.playAsync();
             } else {
               console.error("Audio URI is undefined");
@@ -192,7 +189,7 @@ const ChatScreen = () => {
       <View style={styles.header}>
         <Text style={styles.headerTitle}>{name}</Text>
       </View>
-        {/* Message List */}
+      {/* Message List */}
       <FlatList
         data={messages}
         keyExtractor={(item) => item.id}

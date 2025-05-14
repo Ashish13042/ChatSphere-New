@@ -1,7 +1,7 @@
 // socket.js
 import { io } from "socket.io-client";
-import { APIURL } from "./APIURL";
+import { MAINURL } from "./APIURL";
 
-const socket = io(APIURL); // Replace <your-ip> with your PC's local IP
+const socket = io(MAINURL); // Replace <your-ip> with your PC's local IP
 
 export default socket;

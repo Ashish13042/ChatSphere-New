@@ -96,17 +96,22 @@ const Index = () => {
       <StatusBar backgroundColor="#3498db" barStyle="light-content" />
       <ChatSphereHeader />
       {searchVisible && (
-  <View style={styles.searchContainer}>
-    <AntDesign name="search1" size={18} color="#888" style={styles.searchIcon} />
-    <TextInput
-      style={styles.searchInput}
-      placeholder="Search..."
-      placeholderTextColor="#888"
-      value={searchQuery}
-      onChangeText={setSearchQuery}
-    />
-  </View>
-)}
+        <View style={styles.searchContainer}>
+          <AntDesign
+            name="search1"
+            size={18}
+            color="#888"
+            style={styles.searchIcon}
+          />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search..."
+            placeholderTextColor="#888"
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+          />
+        </View>
+      )}
 
       <View style={styles.topBarConatiner}>
         {["Chats", "Status", "Calls"].map((item, index) => (
@@ -206,16 +211,16 @@ const styles = StyleSheet.create({
   },
   searchInput: {
     flex: 1,
-  fontSize: moderateScale(14),
-  color: "#3498db",
-  paddingVertical: 0,
+    fontSize: moderateScale(14),
+    color: "#3498db",
+    paddingVertical: 0,
   },
   searchContainer: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#3498db",
     marginHorizontal: scale(15),
-   
+
     borderRadius: scale(20),
     paddingHorizontal: scale(10),
     height: verticalScale(36),

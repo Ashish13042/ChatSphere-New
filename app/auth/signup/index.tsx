@@ -1,9 +1,21 @@
-import { View, Text, TextInput, TouchableOpacity, Alert, StyleSheet, Animated } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Alert,
+  StyleSheet,
+  Animated,
+} from "react-native";
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import * as SecureStore from "expo-secure-store";
 import { useRouter } from "expo-router";
-import { deleteLocalItem, getLocalItem, saveLocalItem } from "@/services/secureStorage";
+import {
+  deleteLocalItem,
+  getLocalItem,
+  saveLocalItem,
+} from "@/services/secureStorage";
 import { APIURL } from "@/services/APIURL";
 import axiosInstance from "@/services/GlobalApi";
 
@@ -12,6 +24,7 @@ const SignUpScreen = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [userName, setUserName] = useState("");
 
   // Animation
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -45,16 +58,20 @@ const SignUpScreen = () => {
   interface SignUpResponse {
     token?: string;
   }
-  
+
   const handleSignUp = async () => {
-      try {
-        const response = await axios.post<SignUpResponse>(APIURL + "/auth/signup", {
+    try {
+      const response = await axios.post<SignUpResponse>(
+        APIURL + "/auth/signup",
+        {
           name,
           email,
-          password
-        });
-  
-        if (response.data?.token) {
+          password,
+          userName,
+        }
+      );
+
+      if (response.data?.token) {
         await SecureStore.setItemAsync("userToken", response.data.token);
         saveLocalItem("userToken", response.data.token);
         Alert.alert("Success", "Account created successfully!");
@@ -74,9 +91,34 @@ const SignUpScreen = () => {
     <View style={styles.background}>
       <Animated.View style={[styles.overlay, { opacity: fadeAnim }]}>
         <Text style={styles.title}>Sign Up</Text>
-        <TextInput placeholder="Name" style={styles.input} onChangeText={setName} placeholderTextColor="gray" />
-        <TextInput placeholder="Email" style={styles.input} onChangeText={setEmail} keyboardType="email-address" placeholderTextColor="gray" />
-        <TextInput placeholder="Password" style={styles.input} onChangeText={setPassword} secureTextEntry placeholderTextColor="gray" />
+        <TextInput
+          placeholder="Name"
+          style={styles.input}
+          onChangeText={setName}
+          placeholderTextColor="gray"
+        />
+        <TextInput
+          placeholder="User Name"
+          style={styles.input}
+          onChangeText={setUserName}
+          
+          placeholderTextColor="gray"
+        />
+        <TextInput
+          placeholder="Email"
+          style={styles.input}
+          onChangeText={setEmail}
+          keyboardType="email-address"
+          placeholderTextColor="gray"
+        />
+        <TextInput
+          placeholder="Password"
+          style={styles.input}
+          onChangeText={setPassword}
+          secureTextEntry
+          placeholderTextColor="gray"
+        />
+
         <TouchableOpacity style={styles.button} onPress={handleSignUp}>
           <Text style={styles.buttonText}>Register</Text>
         </TouchableOpacity>
@@ -95,7 +137,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#ffffff",  // Same background as Home screen (dark greenish)
+    backgroundColor: "#ffffff", // Same background as Home screen (dark greenish)
     width: "100%",
     height: "100%",
   },
@@ -107,7 +149,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: "bold",
-    color: "#1c2833",  // Neon green
+    color: "#1c2833", // Neon green
     marginBottom: 25,
   },
   input: {
