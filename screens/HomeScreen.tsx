@@ -16,6 +16,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/features/store";
 import { styles } from "@/styles/HomeScreenStyle";
 import { useRouter } from "expo-router";
+import { MAINURL } from "@/services/APIURL";
 
 const HomeScreen = () => {
   const layout = useWindowDimensions();
@@ -39,7 +40,7 @@ const HomeScreen = () => {
   const renderTabBar = (props: any) => (
     <TabBar
       {...props}
-      indicatorStyle={{ backgroundColor: "#4E6E5D" }}
+      indicatorStyle={{ backgroundColor: "#ff8000" }}
       style={{ backgroundColor: "#fff" }}
       activeColor="#000"
       inactiveColor="#aaa"
@@ -55,9 +56,7 @@ const HomeScreen = () => {
           <Image
             style={styles.profileImage}
             source={{
-              uri:
-                user?.profileImage ||
-                "https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg",
+              uri: `${MAINURL}/uploads/${user?.profileImage}`,
             }}
           />
         </View>

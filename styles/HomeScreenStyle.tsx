@@ -112,6 +112,7 @@ export const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 30,
     elevation: 5,
+    gap: 10,
     flexDirection: "row",
     alignItems: "center",
     shadowColor: "#000",
