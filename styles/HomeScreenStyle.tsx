@@ -1,16 +1,23 @@
 import { StyleSheet } from "react-native";
 
 export const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#FFF", paddingHorizontal: 16 },
+  container: {
+    flex: 1,
+    backgroundColor: "#FFF",
+    paddingHorizontal: 16,
+    paddingVertical: 20,
+  },
   header: {
     flexDirection: "row",
     alignItems: "center",
-    marginTop: 20,
+    marginVertical: 20,
+    justifyContent: "space-between",
+    width: "100%",
   },
   profileImage: {
-    height: 60,
-    width: 60,
-    borderRadius: 25,
+    height: 80,
+    width: 80,
+    borderRadius: 40,
   },
   username: { fontWeight: "bold", fontSize: 20 },
   status: { fontSize: 13, color: "gray" },

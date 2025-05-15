@@ -8,19 +8,14 @@ import {
   Animated,
 } from "react-native";
 import React, { useState, useEffect, useRef } from "react";
-import axios from "axios";
-import * as SecureStore from "expo-secure-store";
 import { useRouter } from "expo-router";
-import {
-  deleteLocalItem,
-  getLocalItem,
-  saveLocalItem,
-} from "@/services/secureStorage";
-import { APIURL } from "@/services/APIURL";
-import axiosInstance from "@/services/GlobalApi";
+import { useDispatch, useSelector } from "react-redux";
+import { signUpUser } from "@/features/userSlice";
+import { RootState } from "@/features/store"; // Adjust path if needed
 
 const SignUpScreen = () => {
   const router = useRouter();
+  const dispatch = useDispatch();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -28,6 +23,8 @@ const SignUpScreen = () => {
 
   // Animation
   const fadeAnim = useRef(new Animated.Value(0)).current;
+
+  const { status, error, user } = useSelector((state: RootState) => state.user);
 
   useEffect(() => {
     Animated.timing(fadeAnim, {
@@ -37,53 +34,15 @@ const SignUpScreen = () => {
     }).start();
   }, []);
 
-  useEffect(() => {
-    const checkUser = async () => {
-      const token = await getLocalItem("userToken");
-      if (token) {
-        const response = await axiosInstance({
-          method: "post",
-          url: "/auth/check-auth",
-        });
-        if (response.status === 200) {
-          router.push("/main");
-        } else {
-          deleteLocalItem("userToken");
-          router.push("/auth/signin");
-        }
-      }
-    };
-    checkUser();
-  }, []);
-  interface SignUpResponse {
-    token?: string;
-  }
-
   const handleSignUp = async () => {
-    try {
-      const response = await axios.post<SignUpResponse>(
-        APIURL + "/auth/signup",
-        {
-          name,
-          email,
-          password,
-          userName,
-        }
-      );
-
-      if (response.data?.token) {
-        await SecureStore.setItemAsync("userToken", response.data.token);
-        saveLocalItem("userToken", response.data.token);
-        Alert.alert("Success", "Account created successfully!");
-      } else {
-        Alert.alert("Error", "Invalid response from server.");
-      }
-    } catch (error) {
-      if ((error as Axios.AxiosError)?.response?.data?.message) {
-        Alert.alert("Error", error.response.data.message);
-      } else {
-        Alert.alert("Error", "Signup failed.");
-      }
+    const res = await dispatch(
+      signUpUser({ name, email, password, userName }) as any
+    );
+    if (res.error) {
+      Alert.alert("Error", res.error.message);
+    } else {
+      router.replace("/main");
+      Alert.alert("Success", "Registration successful!");
     }
   };
 
@@ -101,7 +60,6 @@ const SignUpScreen = () => {
           placeholder="User Name"
           style={styles.input}
           onChangeText={setUserName}
-          
           placeholderTextColor="gray"
         />
         <TextInput
@@ -120,7 +78,9 @@ const SignUpScreen = () => {
         />
 
         <TouchableOpacity style={styles.button} onPress={handleSignUp}>
-          <Text style={styles.buttonText}>Register</Text>
+          <Text style={styles.buttonText}>
+            {status === "loading" ? "Registering..." : "Register"}
+          </Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => router.push("/auth/signin")}>
           <Text style={styles.link}>Already have an account? Sign In</Text>
@@ -131,6 +91,8 @@ const SignUpScreen = () => {
 };
 
 export default SignUpScreen;
+
+// ...styles remain unchanged...
 
 const styles = StyleSheet.create({
   background: {

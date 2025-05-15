@@ -44,9 +44,9 @@ export default function Landing() {
   useEffect(() => {
     if (!fontsLoaded) return; 
     if (status === "succeeded" && user) {
-      router.push("/main");
+      router.replace("/main");
     } else if (status === "failed") {
-      router.push("/auth/signin");
+      router.replace("/auth/signin");
     }
   }, [status, user, router, fontsLoaded]);
 

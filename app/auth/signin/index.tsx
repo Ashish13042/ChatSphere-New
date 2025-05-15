@@ -1,56 +1,33 @@
-import { View, Text, TextInput, TouchableOpacity, Alert, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Alert,
+  StyleSheet,
+} from "react-native";
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import { useRouter } from "expo-router";
-import { deleteLocalItem, getLocalItem, saveLocalItem } from "@/services/secureStorage";
-import { APIURL } from "@/services/APIURL";
+import { useDispatch, useSelector } from "react-redux";
+import { signInUser } from "@/features/userSlice";
+import { RootState } from "@/features/store";
+import { deleteLocalItem, getLocalItem } from "@/services/secureStorage";
 import axiosInstance from "@/services/GlobalApi";
 
 const SignInScreen = () => {
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const router = useRouter();
+  const dispatch = useDispatch();
+  const { status, error, user } = useSelector((state: RootState) => state.user);
 
-  useEffect(() => {
-    const checkUser = async () => {
-      const token = await getLocalItem("userToken");
-      if (token) {
-        const response = await axiosInstance({
-          method: "post",
-          url: "/auth/check-auth",
-        });
-        if (response.status === 200) {
-          router.push("/main");
-        } else {
-          deleteLocalItem("userToken");
-          router.push("/auth/signin");
-        }
-      }
-    };
-    checkUser();
-  }, []);
-  
   const handleSignIn = async () => {
-    try {
-      interface SignInResponse {
-        token: string;
-      }
-
-      const response = await axios.post<SignInResponse>(APIURL + "/auth/signin", {
-        identifier,
-        password,
-      });
-
-      if (response.data.token) {
-        saveLocalItem("userToken", response.data.token);
-        Alert.alert("Success", "Signin successful!");
-        router.replace("/main");
-      } else {
-        Alert.alert("Error", "Invalid response from server.");
-      }
-    } catch (error) {
-      const err = error as any;
-      Alert.alert("Error", err.response?.data?.message || "Signin failed.");
+    const res = await dispatch(signInUser({ identifier, password }) as any);
+    if (res.error) {
+      Alert.alert("Error", res.error.message);
+    } else {
+      Alert.alert("Success", "Signin successful!");
+      router.replace("/main");
     }
   };
 
@@ -58,15 +35,15 @@ const SignInScreen = () => {
     <View style={styles.container}>
       <Text style={styles.title}>Sign In</Text>
 
-      <TextInput 
-        placeholder="Email or Phone Number" 
+      <TextInput
+        placeholder="Email or Phone Number"
         placeholderTextColor="#1c2833"
         style={styles.input}
         onChangeText={setIdentifier}
         keyboardType="default"
       />
-      <TextInput 
-        placeholder="Password" 
+      <TextInput
+        placeholder="Password"
         placeholderTextColor="#1c2833"
         style={styles.input}
         onChangeText={setPassword}
@@ -74,7 +51,9 @@ const SignInScreen = () => {
       />
 
       <TouchableOpacity style={styles.button} onPress={handleSignIn}>
-        <Text style={styles.buttonText}>Sign In</Text>
+        <Text style={styles.buttonText}>
+          {status === "loading" ? "Signing in..." : "Sign In"}
+        </Text>
       </TouchableOpacity>
 
       <TouchableOpacity onPress={() => router.push("/auth/signup")}>
@@ -85,6 +64,7 @@ const SignInScreen = () => {
 };
 
 export default SignInScreen;
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -130,4 +110,3 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
 });
-
