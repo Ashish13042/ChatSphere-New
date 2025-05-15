@@ -21,7 +21,6 @@ SplashScreen.preventAutoHideAsync();
 
 export default function Landing() {
   const router = useRouter();
-
   const [fontsLoaded, error] = useFonts({
     Poppins_700Bold,
     Poppins_200ExtraLight,
@@ -31,21 +30,25 @@ export default function Landing() {
   });
   const { user, status } = useSelector((state: RootState) => state.user);
   const dispatch = useDispatch<AppDispatch>();
+
   useEffect(() => {
     const checkUser = async () => {
       await dispatch(fetchUser());
       SplashScreen.hideAsync();
     };
-    checkUser();
-  }, [dispatch]);
+    if (fontsLoaded) {
+      checkUser();
+    }
+  }, [dispatch, fontsLoaded]);
 
   useEffect(() => {
+    if (!fontsLoaded) return; 
     if (status === "succeeded" && user) {
       router.push("/main");
     } else if (status === "failed") {
       router.push("/auth/signin");
     }
-  }, [status, user, router]);
+  }, [status, user, router, fontsLoaded]);
 
   const imageList = [
     require("./../assets/images/1.1.jpg"),

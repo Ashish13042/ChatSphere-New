@@ -7,10 +7,12 @@ import {
   FlatList,
   TouchableOpacity,
   SectionList,
+  Pressable,
 } from "react-native";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useSelector } from "react-redux";
 import { RootState } from "@/features/store";
+import { useRouter } from "expo-router";
 
 const chats = [
   {
@@ -27,11 +29,11 @@ const chats = [
   },
   {
     id: "2",
-    name: "Ana",
+    name: "Nishant",
     message: "📁 Photo",
     time: "9:34 AM",
-    email: "ana3218@gmail.com",
-    userName: "ana3218",
+    email: "ntih5565@gmail.com",
+    userName: "Nishant",
     unread: 1,
     pinned: true,
     avatar:
@@ -78,11 +80,29 @@ interface Chat {
 const HomeScreen = () => {
   const pinnedChats = chats.filter((chat) => chat.pinned);
   const otherChats = chats.filter((chat) => !chat.pinned);
+  const router = useRouter();
+
+  const handleChatPress = (chat: Chat) => {
+    router.push({
+      pathname: "../../chat", // assuming your file is app/chat.tsx or chat/index.tsx
+      params: {
+        userName: chat.userName,
+        image: chat.avatar,
+        name: chat.name,
+        email: chat.email,
+      },
+    });
+  };
 
   const { user, status } = useSelector((state: RootState) => state.user);
-  console.log(user, status);
   const renderChat = ({ item }: { item: Chat }) => (
-    <View style={styles.chatItem}>
+    <Pressable
+      style={[styles.chatItem, {
+          opacity: user?.userName === item.userName ? 0 : 1,
+      }]}
+      onPress={() => handleChatPress(item)}
+      key={item.id}
+    >
       <Image source={{ uri: item?.avatar }} style={styles.avatar} />
       <View style={{ flex: 1 }}>
         <Text style={styles.name}>{item.name}</Text>
@@ -96,12 +116,11 @@ const HomeScreen = () => {
           </View>
         )}
       </View>
-    </View>
+    </Pressable>
   );
 
   return (
     <View style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
         <Image
           style={styles.profileImage}
