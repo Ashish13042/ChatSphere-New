@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -8,119 +8,109 @@ import {
   TouchableOpacity,
   SectionList,
   Pressable,
+  ActivityIndicator,
 } from "react-native";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useSelector } from "react-redux";
 import { RootState } from "@/features/store";
 import { useRouter } from "expo-router";
+import axiosInstance from "@/services/GlobalApi";
+import { styles } from "@/styles/HomeScreenStyle";
 
-const chats = [
-  {
-    id: "1",
-    name: "Emily",
-    message: "Wanna lunch with me?",
-    email: "emily321@gmail.com",
-    userName: "emily321",
-    time: "9:41 AM",
-    unread: 2,
-    pinned: true,
-    avatar:
-      "https://img.freepik.com/free-vector/young-man-with-glasses-avatar_1308-175763.jpg?uid=R98797265&ga=GA1.1.921125074.1743352734&semt=ais_hybrid&w=740",
-  },
-  {
-    id: "2",
-    name: "Nishant",
-    message: "📁 Photo",
-    time: "9:34 AM",
-    email: "ntih5565@gmail.com",
-    userName: "Nishant",
-    unread: 1,
-    pinned: true,
-    avatar:
-      "https://img.freepik.com/free-vector/smiling-redhaired-boy-illustration_1308-175803.jpg?uid=R98797265&ga=GA1.1.921125074.1743352734&semt=ais_hybrid&w=740",
-  },
-  {
-    id: "3",
-    name: "Farhan",
-    message: "You: Okayy",
-    email: "farhan712@gmail.com",
-    userName: "farhan712",
-    time: "7:00 AM",
-    unread: 0,
-    pinned: false,
-    avatar:
-      "https://img.freepik.com/free-vector/young-man-glasses-hoodie_1308-174658.jpg?uid=R98797265&ga=GA1.1.921125074.1743352734&semt=ais_hybrid&w=740",
-  },
-  {
-    id: "4",
-    name: "Amir",
-    message: "📁 Photo",
-    email: "amirkuchupuchu@gmail.com",
-    userName: "amirkuchupuchu",
-    time: "6:45 AM",
-    unread: 0,
-    pinned: false,
-    avatar:
-      "https://img.freepik.com/free-vector/young-prince-vector-illustration_1308-174367.jpg?uid=R98797265&ga=GA1.1.921125074.1743352734&semt=ais_hybrid&w=740",
-  },
-];
-
-interface Chat {
-  id: string;
+interface Contact {
+  _id: string;
+  contactId: string;
   name: string;
-  message: string;
-  time: string;
-  unread: number;
-  pinned?: boolean;
-  avatar: string;
+  userName: string;
+  profileImage: string;
   email?: string;
-  userName?: string;
+  lastMessage: string;
+  lastMessageType: string;
+  lastMessageTime: string;
+  addedAt: string;
+  pinned?: boolean; // You can add logic for pinned if needed
 }
-
 const HomeScreen = () => {
-  const pinnedChats = chats.filter((chat) => chat.pinned);
-  const otherChats = chats.filter((chat) => !chat.pinned);
+  const [contacts, setContacts] = useState<Contact[]>([]);
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const { user } = useSelector((state: RootState) => state.user);
 
-  const handleChatPress = (chat: Chat) => {
+  useEffect(() => {
+    const fetchContacts = async () => {
+      try {
+        const res = await axiosInstance.get("/contacts");
+        setContacts(res.data as Contact[]);
+      } catch (err) {
+        // Handle error as needed
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchContacts();
+  }, []);
+
+  // Optionally, implement pinned logic if you want
+  const pinnedChats = contacts.filter((c) => c.pinned);
+  const otherChats = contacts.filter((c) => !c.pinned);
+
+  const handleChatPress = (chat: Contact) => {
     router.push({
-      pathname: "../../chat", // assuming your file is app/chat.tsx or chat/index.tsx
+      pathname: "../../chat",
       params: {
         userName: chat.userName,
-        image: chat.avatar,
+        image: chat.profileImage,
         name: chat.name,
         email: chat.email,
       },
     });
   };
 
-  const { user, status } = useSelector((state: RootState) => state.user);
-  const renderChat = ({ item }: { item: Chat }) => (
+  const renderChat = ({ item }: { item: Contact }) => (
     <Pressable
-      style={[styles.chatItem, {
+      style={[
+        styles.chatItem,
+        {
           opacity: user?.userName === item.userName ? 0 : 1,
-      }]}
+        },
+      ]}
       onPress={() => handleChatPress(item)}
-      key={item.id}
+      key={item._id}
     >
-      <Image source={{ uri: item?.avatar }} style={styles.avatar} />
+      <Image source={{ uri: item.profileImage }} style={styles.avatar} />
       <View style={{ flex: 1 }}>
         <Text style={styles.name}>{item.name}</Text>
-        <Text style={styles.message}>{item.message}</Text>
+        <Text style={styles.message}>{item.lastMessage}</Text>
       </View>
       <View style={styles.meta}>
-        <Text style={styles.time}>{item.time}</Text>
-        {item.unread > 0 && (
-          <View style={styles.unreadBadge}>
-            <Text style={styles.unreadText}>{item.unread}</Text>
-          </View>
-        )}
+        <Text style={styles.time}>
+          {item.lastMessageTime
+            ? new Date(item.lastMessageTime).toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+              })
+            : ""}
+        </Text>
       </View>
     </Pressable>
   );
 
+  if (loading) {
+    return (
+      <View
+        style={[
+          styles.container,
+          { justifyContent: "center", alignItems: "center" },
+        ]}
+      >
+        <ActivityIndicator size="large" color="#ff8000" />
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
+      {/* ...header and tabs remain unchanged... */}
       <View style={styles.header}>
         <Image
           style={styles.profileImage}
@@ -143,17 +133,15 @@ const HomeScreen = () => {
         <Ionicons name="ellipsis-vertical" size={20} color="#000" />
       </View>
 
-      {/* Title */}
       <View style={styles.titleRow}>
         <Text style={styles.title}>Chat</Text>
         <View style={styles.countBadge}>
-          <Text style={styles.countText}>34</Text>
+          <Text style={styles.countText}>{contacts.length}</Text>
         </View>
       </View>
 
-      {/* Tabs */}
       <View style={styles.tabBar}>
-        {["All", "Office", "Family", "Archive"].map((tab, index) => (
+        {["Chats", "Request", "Group", "Archive"].map((tab, index) => (
           <TouchableOpacity
             key={index}
             style={index === 0 ? styles.activeTab : styles.inactiveTab}
@@ -169,23 +157,57 @@ const HomeScreen = () => {
         ))}
       </View>
 
-      {/* Pinned / Conversation */}
-      <SectionList
+      {contacts.length === 0 ? (
+        <View
+          style={{
+            // marginTop: 20,
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <Text style={{ fontSize: 18, color: "#000" }}>
+            No chats available.
+          </Text>
+          <Text style={{ fontSize: 14, color: "#aaa" }}>
+            Start a new chat now!
+          </Text>
+        </View>
+      ) : (
+        <SectionList
+          sections={[{ title: "💬 Chats", data: contacts }]}
+          keyExtractor={(item) => item._id}
+          renderItem={renderChat}
+          renderSectionHeader={({ section: { title } }) => (
+            <Text style={styles.sectionTitle}>{title}</Text>
+          )}
+          contentContainerStyle={{ paddingBottom: 100 }}
+          showsVerticalScrollIndicator={false}
+        />
+      )}
+
+      {/* <SectionList
         sections={[
           { title: "📌 Pinned", data: pinnedChats },
           { title: "💬 Chats", data: otherChats },
         ]}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item._id}
         renderItem={renderChat}
         renderSectionHeader={({ section: { title } }) => (
           <Text style={styles.sectionTitle}>{title}</Text>
         )}
         contentContainerStyle={{ paddingBottom: 100 }}
         showsVerticalScrollIndicator={false}
-      />
+      /> */}
 
-      {/* Floating Button */}
-      <TouchableOpacity style={styles.newChatBtn}>
+      <TouchableOpacity
+        style={styles.newChatBtn}
+        onPress={() => {
+          router.push({
+            pathname: "../../chat/new-chat",
+          });
+        }}
+      >
         <MaterialCommunityIcons
           name="message-text-outline"
           size={24}
@@ -197,120 +219,5 @@ const HomeScreen = () => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#FFF", paddingHorizontal: 16 },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 20,
-  },
-  profileImage: {
-    height: 60,
-    width: 60,
-    borderRadius: 25,
-  },
-  username: { fontWeight: "bold", fontSize: 20 },
-  status: { fontSize: 13, color: "gray" },
-  titleRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 20,
-  },
-  title: { fontSize: 28, fontWeight: "bold" },
-  countBadge: {
-    backgroundColor: "#eee",
-    borderRadius: "100%",
-    height: 30,
-    width: 30,
-    justifyContent: "center",
-    alignItems: "center",
-    marginLeft: 10,
-  },
-  countText: {
-    fontSize: 12,
-    fontWeight: "bold",
-  },
-  tabBar: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginVertical: 20,
-  },
-  activeTab: {
-    backgroundColor: "#fff",
-    paddingVertical: 6,
-    paddingHorizontal: 20,
-    borderRadius: 20,
-    elevation: 2,
-  },
-  inactiveTab: {
-    paddingVertical: 6,
-    paddingHorizontal: 20,
-    borderRadius: 20,
-  },
-  activeTabText: {
-    color: "#000",
-    fontWeight: "bold",
-  },
-  inactiveTabText: {
-    color: "#aaa",
-  },
-  sectionTitle: {
-    marginTop: 20,
-    marginBottom: 8,
-    fontWeight: "600",
-    color: "#333",
-  },
-  chatItem: {
-    flexDirection: "row",
-    paddingVertical: 14,
-    alignItems: "center",
-    borderBottomColor: "#eee",
-    borderBottomWidth: 1,
-  },
-  avatar: {
-    height: 60,
-    width: 60,
-    borderRadius: 30,
-    marginRight: 12,
-  },
-  name: { fontWeight: "bold", fontSize: 15 },
-  message: { color: "gray", fontSize: 13 },
-  meta: {
-    alignItems: "flex-end",
-  },
-  time: {
-    fontSize: 12,
-    color: "gray",
-    marginBottom: 5,
-  },
-  unreadBadge: {
-    backgroundColor: "red",
-    borderRadius: 12,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-  },
-  unreadText: {
-    color: "#fff",
-    fontSize: 10,
-  },
-  newChatBtn: {
-    position: "absolute",
-    bottom: 120,
-    right: 20,
-    backgroundColor: "#ff8000",
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: 30,
-    elevation: 5,
-    flexDirection: "row",
-    alignItems: "center",
-    shadowColor: "#000",
-  },
-  newChatText: {
-    color: "#fff",
-    fontWeight: "bold",
-  },
-});
 
 export default HomeScreen;
