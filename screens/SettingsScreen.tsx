@@ -13,6 +13,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/features/store";
 import { deleteLocalItem } from "@/services/secureStorage";
 import { useRouter } from "expo-router";
+import { MAINURL } from "@/services/APIURL";
 
 const SettingsScreen = () => {
   const { user } = useSelector((state: RootState) => state.user);
@@ -34,9 +35,7 @@ const SettingsScreen = () => {
             <Image
               style={styles.profileImage}
               source={{
-                uri:
-                  user?.profileImage ||
-                  "https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg?uid=R98797265&ga=GA1.1.921125074.1743352734&semt=ais_hybrid&w=740",
+                uri: `${MAINURL}/uploads/${user?.profileImage}`,
               }}
             />
           </View>
@@ -137,7 +136,7 @@ const styles = StyleSheet.create({
   profileImage: {
     height: 80,
     width: 80,
-    borderRadius: 25,
+    borderRadius: 40,
   },
   username: { fontWeight: "bold", fontSize: 25 },
   status: { fontSize: 13, color: "gray" },
