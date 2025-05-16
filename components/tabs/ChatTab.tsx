@@ -12,6 +12,7 @@ import { RootState } from "@/features/store";
 import axiosInstance from "@/services/GlobalApi";
 import { styles } from "@/styles/HomeScreenStyle";
 import { useRouter } from "expo-router";
+import { MAINURL } from "@/services/APIURL";
 
 interface Contact {
   _id: string;
@@ -70,7 +71,12 @@ const ChatTab = () => {
       onPress={() => handleChatPress(item)}
       key={item._id}
     >
-      <Image source={{ uri: item.profileImage }} style={styles.avatar} />
+      <Image
+        source={{
+          uri: `${MAINURL}/uploads/${item.profileImage}`,
+        }}
+        style={styles.avatar}
+      />
       <View style={{ flex: 1 }}>
         <Text style={styles.name}>{item.name}</Text>
         <Text style={styles.message}>{item.lastMessage}</Text>
