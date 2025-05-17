@@ -15,8 +15,8 @@ export const styles = StyleSheet.create({
     width: "100%",
   },
   profileImage: {
-    height: 80,
-    width: 80,
+    height: 70,
+    width: 70,
     borderRadius: 40,
   },
   username: { fontWeight: "bold", fontSize: 20 },
