@@ -1,25 +1,24 @@
+import MessageCard from "@/components/MessageCard";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as ImagePicker from "expo-image-picker";
+import React, { useEffect, useState } from "react";
 import {
-  View,
-  FlatList,
-  StyleSheet,
-  TouchableOpacity,
   Alert,
+  FlatList,
   Image,
   Modal,
+  StyleSheet,
   Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
-import React, { useEffect, useState } from "react";
-import { BlurView } from "expo-blur";
+import { moderateScale } from "react-native-size-matters";
+import Ionicons from "react-native-vector-icons/Ionicons";
 
 interface StatusType {
   image: string;
   timestamp: number;
 }
-import Ionicons from "react-native-vector-icons/Ionicons";
-import { moderateScale } from "react-native-size-matters";
-import * as ImagePicker from "expo-image-picker";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import MessageCard from "@/components/MessageCard";
 
 const Status = () => {
   const [myStatus, setMyStatus] = useState<StatusType | null>(null);
@@ -39,54 +38,72 @@ const Status = () => {
     },
   ];
 
-  useEffect(() => {
-    const loadStatus = async () => {
-      const saved = await AsyncStorage.getItem("myStatus");
-      if (saved) {
-        const parsedStatus = JSON.parse(saved);
-        const currentTime = Date.now();
-        const timeDifference = currentTime - parsedStatus.timestamp;
+useEffect(() => {
+  const fetchMyStatus = async () => {
+    try {
+      const res = await fetch("https://vqn6ngc6-5000.inc1.devtunnels.ms/api/status");
+      const statuses = await res.json();
 
-        if (timeDifference < 86400000) {
-          // Less than 24 hours
-          setMyStatus(parsedStatus);
-        } else {
-          // Status expired
-          await AsyncStorage.removeItem("myStatus");
-          setMyStatus(null);
-        }
+      const my = statuses.find((s: any) => s.userId === "6826dde66d13b4030dbcdf1a");
+      if (my) {
+        setMyStatus(my);
       }
-    };
-
-    loadStatus();
-  }, []);
-
-  const handleAddStatus = async () => {
-    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!permission.granted) {
-      Alert.alert(
-        "Permission required",
-        "Enable gallery access to upload status"
-      );
-      return;
-    }
-
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      quality: 0.7,
-    });
-
-    if (!result.canceled) {
-      const newStatus = {
-        image: result.assets[0].uri,
-        timestamp: Date.now(),
-      };
-
-      await AsyncStorage.setItem("myStatus", JSON.stringify(newStatus));
-      setMyStatus(newStatus);
-      Alert.alert("Status", "Status added!");
+    } catch (err) {
+      console.error("Failed to fetch status", err);
     }
   };
+
+  fetchMyStatus();
+}, []);
+
+
+
+  const handleAddStatus = async () => {
+  const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+  if (!permission.granted) {
+    Alert.alert("Permission required", "Enable gallery access to upload status");
+    return;
+  }
+
+  const result = await ImagePicker.launchImageLibraryAsync({
+    mediaTypes: ImagePicker.MediaTypeOptions.Images,
+    quality: 0.7,
+  });
+
+  if (!result.canceled) {
+    const imageUri = result.assets[0].uri;
+    const formData = new FormData();
+    formData.append("image", {
+      uri: imageUri,
+      name: "status.jpg",
+      type: "image/jpeg",
+    });
+
+    formData.append("userId", "6826dde66d13b4030dbcdf1a"); // Replace with real userId from auth later
+
+    try {
+      const res = await fetch("https://vqn6ngc6-5000.inc1.devtunnels.ms/api/status/upload", {
+        method: "POST",
+        body: formData,
+        headers: {
+          // Don't set 'Content-Type'; let fetch handle it
+        },
+      });
+
+      const json = await res.json();
+
+      if (json.status) {
+        setMyStatus(json.status); // set local view
+        Alert.alert("Status added!");
+      } else {
+        Alert.alert("Upload failed", "Unexpected response from server");
+      }
+    } catch (err: any) {
+      Alert.alert("Upload failed", err.message);
+    }
+  }
+};
+
 
   const handleStatusPress = () => {
     if (myStatus) {
@@ -104,6 +121,8 @@ const Status = () => {
 
   return (
     <View style={styles.container}>
+      {/* Status Card */}
+      <Text style={styles.textStyle}>Status</Text>
       <TouchableOpacity
   onPress={handleStatusPress}
   onLongPress={handleStatusLongPress}
@@ -213,12 +232,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 20,
   },
+  textStyle:{
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
 statusCardWrapper: {
   borderBottomColor: "#eee",
   borderBottomWidth: 1,
 },
   logoComponentContainer: {
-    backgroundColor: "white",
+    backgroundColor: "#ff8000",
     borderRadius: 20,
     padding: 4,
     position: "absolute",

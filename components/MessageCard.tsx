@@ -88,8 +88,8 @@ const styles = StyleSheet.create({
     paddingVertical: verticalScale(15),
   },
   image: {
-    height: moderateScale(53),
-    width: moderateScale(53),
+    height: moderateScale(60),
+    width: moderateScale(60),
     borderRadius: moderateScale(53),
   },
   name: {
