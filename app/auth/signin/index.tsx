@@ -26,7 +26,6 @@ const SignInScreen = () => {
     if (res.error) {
       Alert.alert("Error", res.error.message);
     } else {
-      Alert.alert("Success", "Signin successful!");
       router.replace("/main");
     }
   };

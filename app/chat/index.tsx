@@ -17,10 +17,12 @@ const Header = ({
   title,
   image,
   handleBack,
+  userName,
 }: {
   title: string;
   image: string;
   handleBack: any;
+  userName: string;
 }) => (
   <View style={styles.header}>
     <TouchableOpacity onPress={handleBack}>
@@ -35,7 +37,7 @@ const Header = ({
       />
       <View>
         <Text style={styles.headerTitle}>{title}</Text>
-        <Text style={styles.statusText}>Online</Text>
+        <Text style={styles.statusText}>{userName}</Text>
       </View>
     </View>
     <View style={styles.headerIcons}>
@@ -173,7 +175,7 @@ const ChatScreen = () => {
 
       try {
         const token = getLocalItem("userToken");
-        console.log("Token:", token);
+        console.log("File:", formData.get("file"));
         const response = await axiosInstance.post("/upload/file", formData, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -221,16 +223,27 @@ const ChatScreen = () => {
     router.back();
   };
 
+  const handleDeleteMessage = (messageId: string) => {
+    setMessages((prev) =>
+      prev.filter((msg) => msg.id !== messageId && msg.id !== messageId)
+    );
+  };
+
   return (
     <View style={styles.container}>
       <Header
         image={Array.isArray(image) ? image[0] : image}
         title={Array.isArray(name) ? name.join(", ") : name || "Chat"}
+        userName={Array.isArray(userName) ? userName.join(", ") : userName}
         handleBack={handleBack}
       />
 
       <View style={styles.chatSection}>
-        <MessageList messages={messages} flatListRef={flatListRef} />
+        <MessageList
+          messages={messages}
+          flatListRef={flatListRef}
+          onDeleteMessage={handleDeleteMessage}
+        />
         {isTyping && typingUser && <TypingIndicator />}
 
         <MessageInput

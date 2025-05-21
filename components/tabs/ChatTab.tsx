@@ -6,6 +6,8 @@ import {
   SectionList,
   Pressable,
   ActivityIndicator,
+  Modal,
+  TouchableOpacity,
 } from "react-native";
 import { useSelector } from "react-redux";
 import { RootState } from "@/features/store";
@@ -13,6 +15,9 @@ import axiosInstance from "@/services/GlobalApi";
 import { styles } from "@/styles/HomeScreenStyle";
 import { useRouter } from "expo-router";
 import { MAINURL } from "@/services/APIURL";
+import { Ionicons, FontAwesome5, MaterialIcons } from "@expo/vector-icons";
+import renderModalContent from "../UserDetailModel";
+import RenderModalContent from "../UserDetailModel";
 
 interface Contact {
   _id: string;
@@ -31,6 +36,8 @@ interface Contact {
 const ChatTab = () => {
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
+  const [modalVisible, setModalVisible] = useState(false);
   const router = useRouter();
   const { user } = useSelector((state: RootState) => state.user);
 
@@ -60,6 +67,12 @@ const ChatTab = () => {
     });
   };
 
+  const handleImagePress = (contact: Contact) => {
+    setSelectedContact(contact);
+    setModalVisible(true);
+  };
+
+
   const renderChat = ({ item }: { item: Contact }) => (
     <Pressable
       style={[
@@ -71,12 +84,14 @@ const ChatTab = () => {
       onPress={() => handleChatPress(item)}
       key={item._id}
     >
-      <Image
-        source={{
-          uri: `${MAINURL}/uploads/${item.profileImage}`,
-        }}
-        style={styles.avatar}
-      />
+      <Pressable onPress={() => handleImagePress(item)}>
+        <Image
+          source={{
+            uri: `${MAINURL}/uploads/${item.profileImage}`,
+          }}
+          style={styles.avatar}
+        />
+      </Pressable>
       <View style={{ flex: 1 }}>
         <Text style={styles.name}>{item.name}</Text>
         <Text style={styles.message}>{item.lastMessage}</Text>
@@ -102,22 +117,46 @@ const ChatTab = () => {
     );
   }
 
-  return contacts.length === 0 ? (
-    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-      <Text style={{ fontSize: 18, color: "#000" }}>No chats available.</Text>
-      <Text style={{ fontSize: 14, color: "#aaa" }}>Start a new chat now!</Text>
-    </View>
-  ) : (
-    <SectionList
-      sections={[{ title: "💬 Chats", data: contacts }]}
-      keyExtractor={(item) => item._id}
-      renderItem={renderChat}
-      renderSectionHeader={({ section: { title } }) => (
-        <Text style={styles.sectionTitle}>{title}</Text>
+  return (
+    <>
+      {contacts.length === 0 ? (
+        <View
+          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+        >
+          <Text style={{ fontSize: 18, color: "#000" }}>
+            No chats available.
+          </Text>
+          <Text style={{ fontSize: 14, color: "#aaa" }}>
+            Start a new chat now!
+          </Text>
+        </View>
+      ) : (
+        <SectionList
+          sections={[{ data: contacts }]}
+          keyExtractor={(item) => item._id}
+          renderItem={renderChat}
+          contentContainerStyle={{ paddingBottom: 100 }}
+          showsVerticalScrollIndicator={false}
+        />
       )}
-      contentContainerStyle={{ paddingBottom: 100 }}
-      showsVerticalScrollIndicator={false}
-    />
+
+      <Modal visible={modalVisible} animationType="fade" transparent={true}>
+        <TouchableOpacity
+          style={{ flex: 1 }}
+          activeOpacity={1}
+          onPressOut={() => setModalVisible(false)}
+        >
+          <View
+            style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+          >
+            <RenderModalContent
+              selectedContact={selectedContact}
+              setModalVisible={setModalVisible}
+            />
+          </View>
+        </TouchableOpacity>
+      </Modal>
+    </>
   );
 };
 
