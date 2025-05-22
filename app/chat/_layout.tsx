@@ -6,10 +6,7 @@ export default function ChatLayout() {
   return (
     <>
       <StatusBar barStyle="light-content" backgroundColor={"#1E293B"} />
-      <Slot
-        screenOptions={{
-        }}
-      />
+      <Slot />
     </>
   );
 }

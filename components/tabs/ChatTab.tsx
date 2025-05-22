@@ -9,15 +9,14 @@ import {
   Modal,
   TouchableOpacity,
 } from "react-native";
-import { useSelector } from "react-redux";
-import { RootState } from "@/features/store";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@/features/store";
 import axiosInstance from "@/services/GlobalApi";
 import { styles } from "@/styles/HomeScreenStyle";
 import { useRouter } from "expo-router";
 import { MAINURL } from "@/services/APIURL";
-import { Ionicons, FontAwesome5, MaterialIcons } from "@expo/vector-icons";
-import renderModalContent from "../UserDetailModel";
 import RenderModalContent from "../UserDetailModel";
+import { fetchContacts } from "@/features/contacts";
 
 interface Contact {
   _id: string;
@@ -34,30 +33,22 @@ interface Contact {
 }
 
 const ChatTab = () => {
-  const [contacts, setContacts] = useState<Contact[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { contacts, loading } = useSelector(
+    (state: RootState) => state.contacts
+  );
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
   const router = useRouter();
   const { user } = useSelector((state: RootState) => state.user);
+  const dispatch = useDispatch<AppDispatch>();
 
   useEffect(() => {
-    const fetchContacts = async () => {
-      try {
-        const res = await axiosInstance.get("/contacts");
-        setContacts(res.data as Contact[]);
-      } catch (error) {
-        console.error("Error loading contacts:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchContacts();
-  }, []);
+    dispatch(fetchContacts());
+  }, [dispatch]);
 
   const handleChatPress = (chat: Contact) => {
     router.push({
-      pathname: "../../chat",
+      pathname: "/chat/userchat",
       params: {
         userName: chat.userName,
         image: chat.profileImage,
@@ -71,7 +62,6 @@ const ChatTab = () => {
     setSelectedContact(contact);
     setModalVisible(true);
   };
-
 
   const renderChat = ({ item }: { item: Contact }) => (
     <Pressable
@@ -94,7 +84,7 @@ const ChatTab = () => {
       </Pressable>
       <View style={{ flex: 1 }}>
         <Text style={styles.name}>{item.name}</Text>
-        <Text style={styles.message}>{item.lastMessage}</Text>
+        <Text style={styles.message}>Hello Bro What you doing ?</Text>
       </View>
       <View style={styles.meta}>
         <Text style={styles.time}>

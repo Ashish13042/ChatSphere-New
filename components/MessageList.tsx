@@ -13,6 +13,7 @@ import { MAINURL } from "@/services/APIURL";
 import ImageViewing from "react-native-image-viewing";
 import BottomSheet from "@gorhom/bottom-sheet";
 import axiosInstance from "@/services/GlobalApi";
+import { FlashList } from "@shopify/flash-list";
 
 const MessageList = ({ messages, flatListRef, onDeleteMessage }: any) => {
   const [isViewerVisible, setIsViewerVisible] = useState(false);
@@ -20,7 +21,6 @@ const MessageList = ({ messages, flatListRef, onDeleteMessage }: any) => {
   const [selectedMessage, setSelectedMessage] = useState<any>(null);
   const bottomSheetRef = useRef<BottomSheet>(null);
   const snapPoints = useMemo(() => ["25%"], []);
-  // Prepare image list in required format
   const imageMessages = messages
     .filter((m: any) => m.type === "image")
     .map((m: any) => ({ uri: `${MAINURL}/uploads/${m.uri}` }));
@@ -147,6 +147,7 @@ const MessageList = ({ messages, flatListRef, onDeleteMessage }: any) => {
           Math.random().toString()
         }
         renderItem={renderMessage}
+        
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.messageList}
         ref={flatListRef}

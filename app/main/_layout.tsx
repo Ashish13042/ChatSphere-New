@@ -1,5 +1,5 @@
 // BottomTabs.tsx
-import React from "react";
+import React, { useEffect } from "react";
 import {
   View,
   Text,
@@ -13,6 +13,9 @@ import HomeScreen from "@/screens/HomeScreen";
 import StatusScreen from "@/screens/StatusScreen";
 import CallsScreen from "@/screens/CallsScreen";
 import SettingsScreen from "@/screens/SettingsScreen";
+import { fetchUser } from "@/features/userSlice";
+import { AppDispatch } from "@/features/store";
+import { useDispatch } from "react-redux";
 
 const Tab = createBottomTabNavigator();
 
@@ -57,6 +60,15 @@ const CustomTabBar = ({ state, descriptors, navigation }: any) => {
 };
 
 const BottomTabs = () => {
+  const dispatch = useDispatch<AppDispatch>();
+
+  useEffect(() => {
+    const checkUser = async () => {
+      await dispatch(fetchUser());
+    };
+    checkUser();
+  }, [dispatch]);
+
   return (
     <Tab.Navigator
       screenOptions={{
