@@ -12,46 +12,59 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { moderateScale } from "react-native-size-matters";
 import Ionicons from "react-native-vector-icons/Ionicons";
+import { useNavigation } from "@react-navigation/native";
 
 interface StatusType {
   image: string;
   timestamp: number;
 }
 
-const SERVER_URL = "http://localhost:5000"; // 🔁 Replace with IP like http://192.168.x.x if testing on real device
+const SERVER_URL = "http://192.168.1.110:5000";
 
 const Status = () => {
   const [myStatus, setMyStatus] = useState<StatusType | null>(null);
   const [isModalVisible, setModalVisible] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [allStatuses, setAllStatuses] = React.useState<any[]>([]);
+  const [allStatuses, setAllStatuses] = useState<any[]>([]);
+  const navigation = useNavigation<any>();
+
+  const isValidStatus = (status: any): status is StatusType => {
+    return status && typeof status.image === "string" && typeof status.timestamp === "number";
+  };
 
   const fetchStatuses = async () => {
     try {
       const res = await fetch("https://vqn6ngc6-5000.inc1.devtunnels.ms/api/status");
       const statuses = await res.json();
 
-      const my = statuses.find((s: any) => s.userId === "6826dde66d13b4030dbcdf1a");
-      if (my) {
-        setMyStatus(my);
+      const grouped = statuses.reduce((acc: any, status: any) => {
+        if (!acc[status.userId._id]) {
+          acc[status.userId._id] = {
+            userId: status.userId._id,
+            userName: status.userId.userName,
+            statuses: [],
+          };
+        }
+        acc[status.userId._id].statuses.push(status);
+        return acc;
+      }, {});
+
+      const groupedArray = Object.values(grouped);
+
+      const currentUserId = "6826dde66d13b4030dbcdf1a";
+      const my = groupedArray.find((g: any) => g.userId === currentUserId);
+      const others = groupedArray.filter((g: any) => g.userId !== currentUserId);
+
+      if (my && isValidStatus(my.statuses[0])) {
+        setMyStatus(my.statuses[0]);
       } else {
         setMyStatus(null);
       }
 
-      const others = statuses.filter((s: any) => s.userId !== "6826dde66d13b4030dbcdf1a");
-
-      const uniqueOthersMap = new Map<string, any>();
-      others.forEach((status: any) => {
-        const existing = uniqueOthersMap.get(status.userId);
-        if (!existing || status.timestamp > existing.timestamp) {
-          uniqueOthersMap.set(status.userId, status);
-        }
-      });
-      const uniqueOthers = Array.from(uniqueOthersMap.values());
-
-      setAllStatuses(uniqueOthers);
+      setAllStatuses(others);
     } catch (err) {
       console.error("Failed to fetch status", err);
     }
@@ -91,8 +104,6 @@ const Status = () => {
         });
 
         const json = await res.json();
-        console.log("Upload response:", json);
-
         if (json.status) {
           setMyStatus(json.status);
           Alert.alert("Status added!");
@@ -121,7 +132,7 @@ const Status = () => {
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <Text style={styles.textStyle}>Status</Text>
       <TouchableOpacity
         onPress={handleStatusPress}
@@ -134,7 +145,7 @@ const Status = () => {
             message={myStatus ? "Your Status" : "Add your status"}
             image={
               myStatus
-                ? { uri: `${SERVER_URL}${myStatus.image}` } // ✅ Updated
+                ? { uri: `${SERVER_URL}${myStatus.image}` }
                 : require("../assets/images/Ashishimage.png")
             }
             logoComponent={
@@ -143,11 +154,7 @@ const Status = () => {
                 style={styles.logoComponentContainer}
                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
               >
-                <Ionicons
-                  name="add-outline"
-                  size={moderateScale(20)}
-                  color="black"
-                />
+                <Ionicons name="add-outline" size={moderateScale(20)} color="black" />
               </TouchableOpacity>
             }
             disableNavigation={true}
@@ -156,30 +163,27 @@ const Status = () => {
             isStatusCard={true}
           />
         </View>
-        <View style={{ borderBottomColor: "#eee", borderBottomWidth: 1, marginVertical: 10 }} />
       </TouchableOpacity>
 
       <FlatList
         data={allStatuses}
-        keyExtractor={(item, idx) => (item.userId ? String(item.userId) : String(item._id || idx))}
+        keyExtractor={(item) => item.userId}
         renderItem={({ item }) => (
           <MessageCard
-            name={item.userName || "Unknown"}
-            message={new Date(item.timestamp).toLocaleString()}
-            image={{ uri: `${SERVER_URL}${item.image}` }} // ✅ Updated
+            name={item.userName}
+            message={new Date(item.statuses[item.statuses.length - 1].timestamp).toLocaleString()}
+            image={{ uri: `${SERVER_URL}${item.statuses[item.statuses.length - 1].image}` }}
             disableNavigation={true}
+            onPress={() => navigation.navigate("StatusViewer", { statuses: item.statuses })}
           />
         )}
-        style={{ marginTop: 0 }}
+        contentContainerStyle={{ paddingBottom: 80 }}
       />
 
       <Modal visible={isModalVisible} transparent={true} animationType="slide">
         <View style={styles.modalContainer}>
-          <Image source={{ uri: `${SERVER_URL}${myStatus?.image}` }} style={styles.fullImage} /> {/* ✅ Updated */}
-          <TouchableOpacity
-            onPress={() => setModalVisible(false)}
-            style={styles.closeButton}
-          >
+          <Image source={{ uri: `${SERVER_URL}${myStatus?.image}` }} style={styles.fullImage} />
+          <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.closeButton}>
             <Ionicons name="close" size={30} color="white" />
           </TouchableOpacity>
         </View>
@@ -194,14 +198,9 @@ const Status = () => {
         <View style={styles.modalOverlay}>
           <View style={styles.alertBox}>
             <Text style={styles.alertTitle}>Delete Status</Text>
-            <Text style={styles.alertMessage}>
-              Are you sure you want to delete your status?
-            </Text>
+            <Text style={styles.alertMessage}>Are you sure you want to delete your status?</Text>
             <View style={styles.buttonRow}>
-              <TouchableOpacity
-                onPress={() => setShowDeleteConfirm(false)}
-                style={styles.cancelButton}
-              >
+              <TouchableOpacity onPress={() => setShowDeleteConfirm(false)} style={styles.cancelButton}>
                 <Text style={styles.cancelText}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -219,15 +218,14 @@ const Status = () => {
           </View>
         </View>
       </Modal>
-    </View>
+    </SafeAreaView>
   );
 };
-
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFF',
+    backgroundColor: "#FFF",
     paddingHorizontal: 16,
     paddingVertical: 20,
   },
