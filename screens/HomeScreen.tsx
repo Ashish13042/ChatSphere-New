@@ -24,8 +24,6 @@ const HomeScreen = () => {
   const [routes] = useState([
     { key: "chats", title: "Chats" },
     { key: "requests", title: "Requests" },
-    { key: "groups", title: "Groups" },
-    { key: "archive", title: "Archive" },
   ]);
   const { user } = useSelector((state: RootState) => state.user);
   const router = useRouter();

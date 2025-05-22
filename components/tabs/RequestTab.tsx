@@ -11,6 +11,9 @@ import {
 } from "react-native";
 import axiosInstance from "@/services/GlobalApi";
 import { Ionicons } from "@expo/vector-icons";
+import { fetchContacts } from "@/features/contacts";
+import { AppDispatch } from "@/features/store";
+import { useDispatch } from "react-redux";
 
 interface Request {
   _id: string;
@@ -28,6 +31,7 @@ const RequestTab = () => {
   const [search, setSearch] = useState("");
   const [searching, setSearching] = useState(false);
   const [filteredRequests, setFilteredRequests] = useState<Request[]>([]);
+  const dispatch = useDispatch<AppDispatch>();
 
   useEffect(() => {
     const fetchRequests = async () => {
@@ -66,6 +70,7 @@ const RequestTab = () => {
   const handleApprove = async (id: string) => {
     try {
       await axiosInstance.post(`/requests/${id}/approve`);
+      dispatch(fetchContacts());
       setRequests((prev) => prev.filter((req) => req._id !== id));
     } catch (error) {
       console.error("Error approving request:", error);

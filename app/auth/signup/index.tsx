@@ -5,34 +5,23 @@ import {
   TouchableOpacity,
   Alert,
   StyleSheet,
-  Animated,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState } from "react";
 import { useRouter } from "expo-router";
 import { useDispatch, useSelector } from "react-redux";
 import { signUpUser } from "@/features/userSlice";
-import { RootState } from "@/features/store"; // Adjust path if needed
+import { RootState } from "@/features/store";
 
 const SignUpScreen = () => {
-  const router = useRouter();
-  const dispatch = useDispatch();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [userName, setUserName] = useState("");
-
-  // Animation
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-
-  const { status, error, user } = useSelector((state: RootState) => state.user);
-
-  useEffect(() => {
-    Animated.timing(fadeAnim, {
-      toValue: 1,
-      duration: 800,
-      useNativeDriver: true,
-    }).start();
-  }, []);
+  const router = useRouter();
+  const dispatch = useDispatch();
+  const { status } = useSelector((state: RootState) => state.user);
 
   const handleSignUp = async () => {
     const res = await dispatch(
@@ -47,101 +36,124 @@ const SignUpScreen = () => {
   };
 
   return (
-    <View style={styles.background}>
-      <Animated.View style={[styles.overlay, { opacity: fadeAnim }]}>
-        <Text style={styles.title}>Sign Up</Text>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+    >
+      <Text style={styles.heading}>Chat Sphere</Text>
+      <View style={styles.card}>
+        <Text style={styles.title}>Create an Account</Text>
+        <Text style={styles.subtitle}>Sign up to get started</Text>
+
         <TextInput
           placeholder="Name"
+          placeholderTextColor="#666"
           style={styles.input}
           onChangeText={setName}
-          placeholderTextColor="gray"
         />
         <TextInput
           placeholder="User Name"
+          placeholderTextColor="#666"
           style={styles.input}
           onChangeText={setUserName}
-          placeholderTextColor="gray"
         />
         <TextInput
           placeholder="Email"
+          placeholderTextColor="#666"
           style={styles.input}
           onChangeText={setEmail}
           keyboardType="email-address"
-          placeholderTextColor="gray"
         />
         <TextInput
           placeholder="Password"
+          placeholderTextColor="#666"
           style={styles.input}
           onChangeText={setPassword}
           secureTextEntry
-          placeholderTextColor="gray"
         />
 
         <TouchableOpacity style={styles.button} onPress={handleSignUp}>
           <Text style={styles.buttonText}>
-            {status === "loading" ? "Registering..." : "Register"}
+            {status === "loading" ? "Registering..." : "Sign Up"}
           </Text>
         </TouchableOpacity>
+
         <TouchableOpacity onPress={() => router.push("/auth/signin")}>
-          <Text style={styles.link}>Already have an account? Sign In</Text>
+          <Text style={styles.link}>
+            Already have an account?{" "}
+            <Text style={styles.linkHighlight}>Sign In</Text>
+          </Text>
         </TouchableOpacity>
-      </Animated.View>
-    </View>
+      </View>
+    </KeyboardAvoidingView>
   );
 };
 
 export default SignUpScreen;
 
-// ...styles remain unchanged...
-
 const styles = StyleSheet.create({
-  background: {
+  container: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#ffffff", // Same background as Home screen (dark greenish)
-    width: "100%",
-    height: "100%",
-  },
-  overlay: {
-    width: "100%",
+    backgroundColor: "#FFF",
     alignItems: "center",
     paddingHorizontal: 20,
+    paddingVertical: 100,
   },
-  title: {
+  heading: {
     fontSize: 32,
     fontWeight: "bold",
-    color: "#1c2833", // Neon green
-    marginBottom: 25,
+    color: "#007AFF",
+    marginBottom: 80,
+    textAlign: "center",
+  },
+  card: {
+    width: "100%",
+    borderRadius: 20,
+    padding: 24,
+  },
+  title: {
+    fontSize: 26,
+    fontWeight: "700",
+    color: "#1C1C1E",
+    marginBottom: 6,
+  },
+  subtitle: {
+    fontSize: 15,
+    color: "#6e6e73",
+    marginBottom: 24,
   },
   input: {
-    width: "100%",
-    height: 55,
-    backgroundColor: "#f0f0f0", // Light gray input background
-    borderWidth: 1,
-    borderColor: "#ccc", // Light gray border
-    borderRadius: 15,
-    paddingHorizontal: 20,
-    marginBottom: 20,
-    color: "#000814", // Dark text
+    height: 50,
+    backgroundColor: "#f2f2f7",
+    borderRadius: 14,
+    paddingHorizontal: 16,
     fontSize: 16,
+    color: "#000",
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: "#e5e5ea",
   },
   button: {
-    width: "85%",
-    backgroundColor: "#1c2833",
-    padding: 15,
-    borderRadius: 12,
+    height: 50,
+    backgroundColor: "#000",
+    borderRadius: 10,
     alignItems: "center",
-    marginTop: 10,
+    justifyContent: "center",
+    marginTop: 40,
   },
   buttonText: {
-    color: "white",
-    fontWeight: "bold",
-    fontSize: 18,
+    color: "#fff",
+    fontSize: 17,
+    fontWeight: "600",
   },
   link: {
-    color: "#2e86c1",
-    marginTop: 20,
-    fontSize: 15,
+    marginTop: 24,
+    fontSize: 14,
+    color: "#444",
+    textAlign: "center",
+  },
+  linkHighlight: {
+    color: "#007AFF",
+    fontWeight: "600",
   },
 });

@@ -12,44 +12,7 @@ import TypingIndicator from "@/components/TypingIndicator";
 import { getLocalItem } from "@/services/secureStorage";
 import styles from "@/styles/ChatScreenStyle";
 import MessageList from "@/components/MessageList";
-
-const Header = ({
-  title,
-  image,
-  handleBack,
-}: {
-  title: string;
-  image: string;
-  handleBack: any;
-}) => (
-  <View style={styles.header}>
-    <TouchableOpacity onPress={handleBack}>
-      <Ionicons name="chevron-back" size={24} color="#fff" />
-    </TouchableOpacity>
-    <View style={styles.headerInfo}>
-      <Image
-        source={{
-          uri: image,
-        }}
-        style={styles.avatar}
-      />
-      <View>
-        <Text style={styles.headerTitle}>{title}</Text>
-        <Text style={styles.statusText}>Online</Text>
-      </View>
-    </View>
-    <View style={styles.headerIcons}>
-      <Ionicons
-        name="call-outline"
-        size={22}
-        color="#fff"
-        style={{ marginRight: 15 }}
-      />
-      <Ionicons name="videocam-outline" size={22} color="#fff" />
-    </View>
-  </View>
-);
-
+import Header from "@/components/Header";
 const ChatScreen = () => {
   const { userName, name, image, email } = useLocalSearchParams();
   const router = useRouter();
@@ -139,16 +102,15 @@ const ChatScreen = () => {
       ...prev,
       { ...messageData, sender: "me" } as Message,
     ]);
-
+    setInput("");
+    // scroll to the bottom
+    flatListRef.current?.scrollToEnd({ animated: true });
     socket.emit("send-message", messageData);
-
     try {
       await axiosInstance.post("/chat/save", messageData);
     } catch (error) {
       console.error("❌ Failed to save message:", error);
     }
-
-    setInput("");
   };
 
   //* Handle pick image
@@ -173,7 +135,7 @@ const ChatScreen = () => {
 
       try {
         const token = getLocalItem("userToken");
-        console.log("Token:", token);
+        console.log("File:", formData.get("file"));
         const response = await axiosInstance.post("/upload/file", formData, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -211,7 +173,7 @@ const ChatScreen = () => {
     socket.emit("typing", { roomId, sender: currentUser });
   };
 
-  //* Scroll to the end of the chat when new messages arrive
+  // scroll to the bottom when messages change
   useEffect(() => {
     flatListRef.current?.scrollToEnd({ animated: true });
   }, [messages]);
@@ -221,16 +183,27 @@ const ChatScreen = () => {
     router.back();
   };
 
+  const handleDeleteMessage = (messageId: string) => {
+    setMessages((prev) =>
+      prev.filter((msg) => msg.id !== messageId && msg.id !== messageId)
+    );
+  };
+
   return (
     <View style={styles.container}>
       <Header
         image={Array.isArray(image) ? image[0] : image}
         title={Array.isArray(name) ? name.join(", ") : name || "Chat"}
+        userName={Array.isArray(userName) ? userName.join(", ") : userName}
         handleBack={handleBack}
       />
 
       <View style={styles.chatSection}>
-        <MessageList messages={messages} flatListRef={flatListRef} />
+        <MessageList
+          messages={messages}
+          flatListRef={flatListRef}
+          onDeleteMessage={handleDeleteMessage}
+        />
         {isTyping && typingUser && <TypingIndicator />}
 
         <MessageInput
