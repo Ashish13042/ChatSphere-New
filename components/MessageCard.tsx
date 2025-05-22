@@ -6,7 +6,7 @@ import {
   Image,
   Pressable,
 } from "react-native";
-import React, { useState } from "react";
+import React from "react";
 import { moderateScale, scale, verticalScale } from "react-native-size-matters";
 import { router } from "expo-router";
 
@@ -19,35 +19,53 @@ const MessageCard = ({
   logoComponent,
   onImagePress,
   rightIcon,
-  messageLefticon
+  messageLefticon,
+  disableNavigation = false,
+  onPress,
+  onLongPress,
+  isStatusCard = false, // 💡 New flag to make this behave as status card
 }: any) => {
   return (
-    <>
-      <TouchableOpacity style={styles.button} onPress={() =>
-  router.push({
-    pathname: "./main/ChatScreen",
-    params: { name, message },
-  })
-}
->
-        <View style={styles.LeftContainer}>
-          <View>
-            <TouchableOpacity onPress={onImagePress}>
-              <Image source={image} style={styles.image} />
+    <Pressable
+      style={styles.button}
+      onPress={() => {
+        if (onPress) return onPress();
+        if (!disableNavigation && !isStatusCard) {
+          router.push({
+            pathname: "./components/atoms/ChatScreen",
+            params: { name, message },
+          });
+        }
+      }}
+      onLongPress={onLongPress}
+    >
+      <View style={styles.LeftContainer}>
+        {/* Profile Image + Logo */}
+        <View style={{ position: "relative" }}>
+          <Pressable onPress={onImagePress} hitSlop={10}>
+            <Image source={image} style={styles.image} />
+          </Pressable>
+          {logoComponent && (
+            <View style={styles.logoWrapper} pointerEvents="box-none">
               {logoComponent}
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.textContainer}>
-            <Text style={styles.name}>{name}</Text>
-            <View style={styles.flexRow}>
-              {messageLefticon}
-            <Text style={styles.message}>{message}</Text>
             </View>
-            
-          </View>
+          )}
         </View>
 
+        {/* Name + Message */}
+        <View style={styles.textContainer}>
+          <Text style={styles.name}>{name}</Text>
+          {!!message && (
+            <View style={styles.flexRow}>
+              {messageLefticon}
+              <Text style={styles.message}>{message}</Text>
+            </View>
+          )}
+        </View>
+      </View>
+
+      {/* Right Side (for Chat only) */}
+      {!isStatusCard && (
         <View style={styles.rightContainer}>
           {time && <Text style={styles.time}>{time}</Text>}
           {!!count && (
@@ -57,8 +75,8 @@ const MessageCard = ({
           )}
           {rightIcon}
         </View>
-      </TouchableOpacity>
-    </>
+      )}
+    </Pressable>
   );
 };
 
@@ -67,12 +85,11 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: scale(20),
     paddingVertical: verticalScale(15),
   },
   image: {
-    height: moderateScale(53),
-    width: moderateScale(53),
+    height: moderateScale(60),
+    width: moderateScale(60),
     borderRadius: moderateScale(53),
   },
   name: {
@@ -116,12 +133,16 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: verticalScale(5),
   },
-  flexRow:{
-    flexDirection:"row",
-    alignItems:"center",
-    gap:scale(10),
-
-  }
+  flexRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: scale(10),
+  },
+  logoWrapper: {
+    position: "absolute",
+    bottom: 0,
+    right: 0,
+  },
 });
 
 export default MessageCard;

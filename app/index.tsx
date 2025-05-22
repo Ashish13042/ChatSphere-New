@@ -55,9 +55,9 @@ export default function Landing() {
     require("./../assets/images/1.1.jpg"),
     require("./../assets/images/2.1.jpg"),
     require("./../assets/images/3.1.jpg"),
-    require("./../assets/images/4.1.jpg"),
+    require("./../assets/images/4.1.png"),
     require("./../assets/images/5.1.jpg"),
-    require("./../assets/images/6.1.jpg"),
+    require("./../assets/images/6.1.png"),
   ];
 
   return (
@@ -132,7 +132,7 @@ export default function Landing() {
           💬 Instant Chats, Endless Connections! 🚀
         </Text>
         <TouchableOpacity
-          onPress={() => router.push("/auth/signin")}
+          onPress={() => router.push("/main")}
           style={styles.button}
         >
           <Text
@@ -163,7 +163,7 @@ const styles = StyleSheet.create({
   },
   button: {
     backgroundColor: Colors.PRIMARY,
-    padding: 13,
+    padding: 15,
     borderRadius: 15,
   },
 });
