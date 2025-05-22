@@ -17,6 +17,7 @@ import { useRouter } from "expo-router";
 import { MAINURL } from "@/services/APIURL";
 import RenderModalContent from "../UserDetailModel";
 import { fetchContacts } from "@/features/contacts";
+import { useFocusEffect } from "@react-navigation/native";
 
 interface Contact {
   _id: string;
@@ -42,13 +43,15 @@ const ChatTab = () => {
   const { user } = useSelector((state: RootState) => state.user);
   const dispatch = useDispatch<AppDispatch>();
 
-  useEffect(() => {
-    dispatch(fetchContacts());
-  }, [dispatch]);
+  useFocusEffect(
+    React.useCallback(() => {
+      dispatch(fetchContacts());
+    }, [dispatch])
+  );
 
   const handleChatPress = (chat: Contact) => {
     router.push({
-      pathname: "/chat/userchat",
+      pathname: "/chat",
       params: {
         userName: chat.userName,
         image: chat.profileImage,
@@ -84,7 +87,7 @@ const ChatTab = () => {
       </Pressable>
       <View style={{ flex: 1 }}>
         <Text style={styles.name}>{item.name}</Text>
-        <Text style={styles.message}>Hello Bro What you doing ?</Text>
+        <Text style={styles.message}>{item?.lastMessage}</Text>
       </View>
       <View style={styles.meta}>
         <Text style={styles.time}>

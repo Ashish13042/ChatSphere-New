@@ -28,10 +28,13 @@ const initialState: ContactsState = {
 };
 
 // Async thunk to fetch contacts
-export const fetchContacts = createAsyncThunk("contacts/fetchContacts", async () => {
-  const response = await axiosInstance.get("/contacts");
-  return response.data as Contact[];
-});
+export const fetchContacts = createAsyncThunk(
+  "contacts/fetchContacts",
+  async () => {
+    const response = await axiosInstance.get("/contacts");
+    return response.data as Contact[];
+  }
+);
 
 const contactsSlice = createSlice({
   name: "contacts",

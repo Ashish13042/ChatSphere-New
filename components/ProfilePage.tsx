@@ -114,7 +114,6 @@ const ProfilePage = () => {
         </View>
       </View>
 
-      {/* Image Edit Modal */}
       <Modal visible={isModalVisible} transparent animationType="fade">
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>

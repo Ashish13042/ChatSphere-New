@@ -9,13 +9,14 @@ import {
   Pressable,
   Alert,
 } from "react-native";
-import React, { useState } from "react";
+import React, { use, useState } from "react";
 import MessageCard from "../components/MessageCard";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { scale, verticalScale, moderateScale } from "react-native-size-matters";
 import { Feather, FontAwesome, MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { Linking } from "react-native";
+import { MAINURL } from "@/services/APIURL";
 
 const Chats = () => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -27,9 +28,11 @@ const Chats = () => {
 
   const data = [
     {
-      image: require("../assets/images/Ashishimage.png"),
+      image: `${MAINURL}/uploads/1747940661992-935899360.png`,
       name: "Ashish Rawat",
+      userName: "ashish_rawat",
       message: "Today, 5.47 pm",
+      email: "anjur3262@40gmail.com",
       phoneNumber: "+917011491458",
       rightIcon: <FontAwesome name="video-camera" style={styles.callIcon} />,
       messageLeftIcon: (
@@ -40,8 +43,10 @@ const Chats = () => {
       ),
     },
     {
-      image: require("../assets/images/Nishantimage.png"),
+      image: `${MAINURL}/uploads/1747937314709-537371977.jpeg`,
       name: "Nishant Kumar Singh",
+      userName: "Nishant",
+      email: "ntih5565@gmail.com",
       message: "26 April, 11.47 pm",
       phoneNumber: "+917827603933",
       rightIcon: <Ionicons name="call" style={styles.callIcon} />,
@@ -143,15 +148,18 @@ const Chats = () => {
               <View style={styles.iconButtonWrapper}>
                 <TouchableOpacity
                   style={styles.iconButton}
-                  onPress={() =>
+                  onPress={() => {
+                    setModalVisible(false);
                     router.push({
                       pathname: "/chat",
                       params: {
-                        name: selectedContact?.name,
-                        message: selectedContact?.message,
+                        userName: selectedContact.userName,
+                        image: selectedContact.profileImage,
+                        name: selectedContact.name,
+                        email: selectedContact.email,
                       },
-                    })
-                  }
+                    });
+                  }}
                 >
                   <MaterialIcons name="message" size={28} color="white" />
                 </TouchableOpacity>
@@ -179,9 +187,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#FFF",
     paddingHorizontal: 16,
-    paddingVertical: 50
+    paddingVertical: 20,
   },
-  headerStyle:{
+  headerStyle: {
     fontSize: 20,
     fontWeight: "bold",
     marginBottom: 10,
