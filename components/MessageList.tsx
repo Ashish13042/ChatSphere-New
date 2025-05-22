@@ -13,7 +13,6 @@ import { MAINURL } from "@/services/APIURL";
 import ImageViewing from "react-native-image-viewing";
 import BottomSheet from "@gorhom/bottom-sheet";
 import axiosInstance from "@/services/GlobalApi";
-import { FlashList } from "@shopify/flash-list";
 
 const MessageList = ({ messages, flatListRef, onDeleteMessage }: any) => {
   const [isViewerVisible, setIsViewerVisible] = useState(false);

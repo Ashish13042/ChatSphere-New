@@ -4,7 +4,7 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 import * as ImagePicker from "expo-image-picker";
 import { router, useLocalSearchParams, useRouter } from "expo-router";
 import socket from "@/services/socket";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/features/store";
 import axiosInstance from "@/services/GlobalApi";
 import MessageInput from "@/components/MessageInput";
@@ -13,6 +13,8 @@ import { getLocalItem } from "@/services/secureStorage";
 import styles from "@/styles/ChatScreenStyle";
 import MessageList from "@/components/MessageList";
 import Header from "@/components/Header";
+import { AppDispatch } from "@/features/store";
+import { fetchUser } from "@/features/userSlice";
 const ChatScreen = () => {
   const { userName, name, image, email } = useLocalSearchParams();
   const router = useRouter();
@@ -31,7 +33,7 @@ const ChatScreen = () => {
   const [isTyping, setIsTyping] = useState(false);
   const [typingUser, setTypingUser] = useState<string | null>(null);
   const { user } = useSelector((state: RootState) => state.user);
-
+  const dispatch = useDispatch<AppDispatch>();
   const currentUser = user?.userName;
   const recipientUser = userName?.toString();
   const roomId = [currentUser, recipientUser].sort().join("_");
@@ -40,6 +42,7 @@ const ChatScreen = () => {
 
   //* Join the room when the component mounts
   useEffect(() => {
+
     if (!currentUser || !recipientUser) return;
 
     socket.emit("join-room", { roomId });
@@ -96,6 +99,8 @@ const ChatScreen = () => {
       sender: currentUser,
       text: input,
       type: "text",
+      reciever: recipientUser,
+      timestamp: new Date().toISOString(),
     };
 
     setMessages((prev) => [
@@ -103,7 +108,6 @@ const ChatScreen = () => {
       { ...messageData, sender: "me" } as Message,
     ]);
     setInput("");
-    // scroll to the bottom
     flatListRef.current?.scrollToEnd({ animated: true });
     socket.emit("send-message", messageData);
     try {
@@ -153,6 +157,7 @@ const ChatScreen = () => {
           sender: currentUser,
           type: "image",
           uri: filename,
+          reciever: recipientUser,
         };
 
         setMessages((prev) => [

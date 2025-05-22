@@ -30,7 +30,7 @@ const SettingsScreen = () => {
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      <View style={{ marginBottom:140 }}>
+      <View style={{ marginBottom: 140 }}>
         <View style={styles.header}>
           <TouchableOpacity
             style={styles.backBtn}
@@ -359,7 +359,6 @@ const styles = StyleSheet.create({
   },
   logoutBtn: {
     backgroundColor: "rgba(220, 53, 69, 0.1)",
-    
   },
   logoutBtnText: {
     color: "#dc3545",

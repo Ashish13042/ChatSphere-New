@@ -16,46 +16,54 @@ import SettingsScreen from "@/screens/SettingsScreen";
 import { fetchUser } from "@/features/userSlice";
 import { AppDispatch } from "@/features/store";
 import { useDispatch } from "react-redux";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const Tab = createBottomTabNavigator();
 
 const CustomTabBar = ({ state, descriptors, navigation }: any) => {
   return (
-    <View style={styles.tabBar}>
-      {state.routes.map((route: any, index: number) => {
-        const { options } = descriptors[route.key];
-        const isFocused = state.index === index;
-        const Icon = options.tabBarIcon;
+    <SafeAreaView
+      style={{
+        backgroundColor: "#fff",
+        paddingBottom: Platform.OS === "android" ? 10 : 0,
+      }}
+    >
+      <View style={styles.tabBar}>
+        {state.routes.map((route: any, index: number) => {
+          const { options } = descriptors[route.key];
+          const isFocused = state.index === index;
+          const Icon = options.tabBarIcon;
 
-        const onPress = () => {
-          if (!isFocused) navigation.navigate(route.name);
-        };
+          const onPress = () => {
+            if (!isFocused) navigation.navigate(route.name);
+          };
 
-        return (
-          <TouchableOpacity
-            key={route.key}
-            accessibilityRole="button"
-            onPress={onPress}
-            style={[styles.tabButton, isFocused && styles.tabButtonActive]}
-          >
-            <View style={styles.iconContainer}>
-              {Icon({
-                color: isFocused ? "#fff" : "#000",
-                size: 24,
-              })}
+          return (
+            <TouchableOpacity
+              key={route.key}
+              accessibilityRole="button"
+              onPress={onPress}
+              style={[styles.tabButton, isFocused && styles.tabButtonActive]}
+            >
+              <View style={styles.iconContainer}>
+                {Icon({
+                  color: isFocused ? "#fff" : "#000",
+                  size: 24,
+                })}
 
-              {/* Fake badge example for demo */}
-              {(route.name === "Home" || route.name === "Calls") && (
-                <View style={styles.badge} />
-              )}
-            </View>
-            <Text style={[styles.label, isFocused && styles.labelActive]}>
-              {options.tabBarLabel}
-            </Text>
-          </TouchableOpacity>
-        );
-      })}
-    </View>
+                {/* Fake badge example for demo */}
+                {(route.name === "Home" || route.name === "Calls") && (
+                  <View style={styles.badge} />
+                )}
+              </View>
+              <Text style={[styles.label, isFocused && styles.labelActive]}>
+                {options.tabBarLabel}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+    </SafeAreaView>
   );
 };
 

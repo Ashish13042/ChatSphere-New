@@ -11,12 +11,14 @@ import { MAINURL } from "@/services/APIURL";
 import { FontAwesome5, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import * as Animatable from "react-native-animatable";
 import { BlurView } from "expo-blur";
+import { useRouter } from "expo-router";
 
 const { width } = Dimensions.get("window");
 
 const RenderModalContent = ({ selectedContact, setModalVisible }: any) => {
   if (!selectedContact) return null;
 
+  const router = useRouter();
   return (
     <View style={styles.overlay}>
       <BlurView intensity={70} tint="dark" style={StyleSheet.absoluteFill} />
@@ -37,7 +39,23 @@ const RenderModalContent = ({ selectedContact, setModalVisible }: any) => {
         </View>
 
         <View style={styles.actionRow}>
-          <ActionIcon icon="chat" label="Chat" IconPack={MaterialIcons} />
+          <ActionIcon
+            icon="chat"
+            label="Chat"
+            IconPack={MaterialIcons}
+            handleClick={() => {
+              setModalVisible(false);
+              router.push({
+                pathname: "/chat",
+                params: {
+                  userName: selectedContact.userName,
+                  image: selectedContact.profileImage,
+                  name: selectedContact.name,
+                  email: selectedContact.email,
+                },
+              });
+            }}
+          />
           <ActionIcon icon="call-outline" label="Call" IconPack={Ionicons} />
           <ActionIcon
             icon="videocam-outline"
@@ -56,8 +74,18 @@ const RenderModalContent = ({ selectedContact, setModalVisible }: any) => {
   );
 };
 
-const ActionIcon = ({ icon, label, IconPack, color = "white" }: any) => (
-  <TouchableOpacity style={styles.actionBtn} activeOpacity={0.75}>
+const ActionIcon = ({
+  icon,
+  label,
+  IconPack,
+  color = "white",
+  handleClick,
+}: any) => (
+  <TouchableOpacity
+    style={styles.actionBtn}
+    activeOpacity={0.75}
+    onPress={handleClick}
+  >
     <IconPack name={icon} size={18} color={color} />
   </TouchableOpacity>
 );
