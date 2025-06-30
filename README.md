@@ -9,9 +9,7 @@
 - 💬 **Real-time Messaging** — Send and receive messages instantly.
 - 🔒 **User Authentication** — Secure sign-up and sign-in with protected routes.
 - 📱 **Responsive Mobile UI** — Built with React Native and Expo for smooth cross-platform performance.
-- 📷 **Status Upload** — Upload and view status updates like WhatsApp.
 - ✅ **MongoDB Integration** — Stores user data and chat history.
-- 🔔 **Push Notifications** *(optional, if implemented)* — Get notified of new messages in real time.
 
 ---
 
