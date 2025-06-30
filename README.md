@@ -29,7 +29,7 @@
 
 > Example:  
 > ![Login & Sign Up Screen]
-![image](https://github.com/user-attachments/assets/b283cc14-e688-4eed-b8bd-d6e215dbbf6f)
+> ![image](https://github.com/user-attachments/assets/b283cc14-e688-4eed-b8bd-d6e215dbbf6f)
 
 > ![Chat & New Chat Screen]
 ![image](https://github.com/user-attachments/assets/a992ff21-1b47-467c-a0a4-235baa9c0581)
